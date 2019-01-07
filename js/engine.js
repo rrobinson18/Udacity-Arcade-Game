@@ -9,9 +9,8 @@
  * drawn but that is not the case. What's really happening is the entire "scene"
  * is being drawn over and over, presenting the illusion of animation.
  *
- * This engine is available globally via the Engine variable and it also makes
- * the canvas' context (ctx) object globally available to make writing app.js
- * a little simpler to work with.
+ * This engine makes the canvas' context (ctx) object globally available to make
+ * writing app.js a little simpler to work with.
  */
 
 var Engine = (function(global) {
@@ -23,7 +22,18 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
-        lastTime;
+        lastTime,
+        id;
+
+const modal = document.querySelector('.modal-bg');
+const replay = document.querySelector('.modal-button');
+
+replay.addEventListener('click', function() {
+  modal.classList.toggle('hide');
+  player.reset();
+  player.victory = false;
+  win.requestAnimationFrame(main);
+});
 
     canvas.width = 505;
     canvas.height = 606;
@@ -56,9 +66,15 @@ var Engine = (function(global) {
         /* Use the browser's requestAnimationFrame function to call this
          * function again as soon as the browser is able to draw another frame.
          */
-        win.requestAnimationFrame(main);
-    }
 
+         if (player.victory === true) {
+           win.cancelAnimationFrame(id);
+           modal.classList.toggle('hide');
+         }
+         else {
+        id = win.requestAnimationFrame(main);
+    }
+}
     /* This function does some initial setup that should only occur once,
      * particularly setting the lastTime variable that is required for the
      * game loop.
@@ -93,7 +109,7 @@ var Engine = (function(global) {
     function updateEntities(dt) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
-        });
+       });
         player.update();
     }
 
@@ -118,6 +134,9 @@ var Engine = (function(global) {
             numRows = 6,
             numCols = 5,
             row, col;
+
+        // Before drawing, clear existing canvas
+        ctx.clearRect(0,0,canvas.width,canvas.height)
 
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
@@ -147,9 +166,9 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
-        allEnemies.forEach(function(enemy) {
+         allEnemies.forEach(function(enemy) {
             enemy.render();
-        });
+         });
 
         player.render();
     }
